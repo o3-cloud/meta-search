@@ -1,0 +1,33 @@
+version: 3
+
+includes:
+  lib: /Users/owenzanzal/Projects/cllm/.cllm/tasks/Taskfile_chat.yml
+tasks:
+  setup:
+    cmds:
+      - task: lib:chat
+        vars:
+          CHAT_CONTEXT: "project"
+          CHAT_ROLE: "You are a software project manager"
+          CHAT_INSTRUCTION: |
+            Collect the requirements from the client and create a project plan. As the client
+            one question at a time and make sure you understand the requirements before moving on.
+          STOP_WORD: "DONE"
+          SESSION_DIR: ".project"
+  setup-docs:
+    - cllm -cp .project -c project --disable-chat-context-write -po "Markdown formatted text" -pi "Create a README.md file" gpt/4 > README.md
+    - |
+      cllm -cp .project -c project --disable-chat-context-write \
+      -pr "You are a software project manager" \
+      -po "Markdown formatted text" \
+      -pi "This project into individual tasks. Order in the order they should be delivered." gpt/4 > TASKS.md
+  code:
+    cmds:
+      - code2prompt --filter "*.md,*.yml" --path ./ --output .project/code.txt --exclude "**/node_modules/**,*-lock.json,*.png,.cllm,.project" --line-number
+  do:
+    cmds:
+      - task: code
+      - cllm -pp "$(cat .project/code.txt)" -cp .project -c project --disable-chat-context-write gpt/4 "{{.q}}"
+  gh-add:
+    cmds:
+      - cat gh.json | jq -r '.[]' | while IFS= read -r line; do gh issue create --title "$line" --body ""; sleep 5; done
