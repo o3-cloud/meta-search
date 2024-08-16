@@ -1,5 +1,23 @@
 # Meta Search
 
+```mermaid
+graph TD
+    A[User] -->|Search Query| B[FastHTML Web App]
+    B -->|Keyword Search| C[PostgreSQL Database]
+    B -->|Scraping Requests| D[Scrapy Spiders]
+    D -->|Scraped Data| C
+    D -->|Scheduled Scraping| E[Task Scheduler]
+    E -->|Trigger Scraping| D
+    F[Docker] -->|Containerization| B
+    F -->|Containerization| C
+    F -->|Containerization| D
+    F -->|Containerization| E
+    G[Deployment] -->|Deploys| B
+    G -->|Deploys| C
+    G -->|Deploys| D
+    G -->|Deploys| E
+```
+
 Meta Search is a web application that scrapes data from specified websites and APIs, processes the data, and provides a search interface for users to query the scraped content. The application is built using Python, Scrapy, FastHTML, and PostgreSQL, and it utilizes Docker for containerization.
 
 ## Features
